@@ -16,5 +16,6 @@
     #import <Foundation/Foundation.h>
     #import "ReactiveCocoa.h"
     #import "EXTScope.h"
+    #import "RACAFNetworking.h"
 
 #endif

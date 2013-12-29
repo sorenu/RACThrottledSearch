@@ -4,16 +4,11 @@
 //
 
 #import "ViewModel.h"
-#import "AFHTTPRequestOperationManager.h"
-#import "AFHTTPRequestOperationManager+RACSupport.h"
 
 @interface ViewModel ()
-
 @property (strong, nonatomic) AFHTTPRequestOperationManager *requestOperationManager;
 @property (strong, nonatomic) RACDisposable *currentSearchDisposable;
-
 @end
-
 
 @implementation ViewModel {
 
@@ -31,12 +26,7 @@
 - (void)performSearchWithQuery:(NSString *)query {
     [self.currentSearchDisposable dispose];
 
-    NSString *urlString = [NSString stringWithFormat:@"http://bestwebserviceintheworld.herokuapp.com/?q=%@", query];
-
-    RACSignal *searchSignal = [[self.requestOperationManager rac_GET:urlString parameters:nil] map:^(RACTuple *tuple) {
-        RACTupleUnpack(AFHTTPRequestOperation *operation, NSDictionary *response) = tuple;
-        return response;
-    }];
+    RACSignal *searchSignal = [self searchSignalWithQuery:query];
 
     @weakify(self)
     self.currentSearchDisposable = [searchSignal subscribeNext:^(NSDictionary *result) {
@@ -46,5 +36,12 @@
     }];
 }
 
+- (RACSignal *)searchSignalWithQuery:(NSString *)query {
+    NSString *urlString = [NSString stringWithFormat:@"http://bestwebserviceintheworld.herokuapp.com/?q=%@", query];
+    return [[self.requestOperationManager rac_GET:urlString parameters:nil] map:^(RACTuple *tuple) {
+        RACTupleUnpack(AFHTTPRequestOperation *operation, NSDictionary *response) = tuple;
+        return response;
+    }];
+}
 
 @end

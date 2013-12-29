@@ -3,9 +3,6 @@
 // Copyright (c) 2013 Shape A/S. All rights reserved.
 //
 
-@class RACSignal;
-
-
 @interface ViewModel : NSObject
 
 @property (strong, nonatomic) NSString *searchResult;

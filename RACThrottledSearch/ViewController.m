@@ -6,9 +6,7 @@
 #import "ViewController.h"
 #import "ViewModel.h"
 
-static const NSInteger kMinimumQueryLength = 2;
-
-@interface ViewController ()
+@interface ViewController () <UITextFieldDelegate>
 @property (strong, nonatomic) UITextField *searchInputTextField;
 @property (strong, nonatomic) UITextView *searchResultTextView;
 @end
@@ -42,8 +40,10 @@ static const NSInteger kMinimumQueryLength = 2;
     [self.view addSubview:self.searchInputTextField];
     [self.view addSubview:self.searchResultTextView];
 
-    self.searchInputTextField.frame = CGRectMake(10, 40, 300, 50);
-    self.searchResultTextView.frame = CGRectMake(10, CGRectGetMaxY(self.searchInputTextField.frame) + 10, 300, 200);
+    static const CGFloat kViewMargin = 10;
+    CGFloat viewWidth = CGRectGetWidth(self.view.frame) - 2 * kViewMargin;
+    self.searchInputTextField.frame = CGRectMake(kViewMargin, 40, viewWidth, 50);
+    self.searchResultTextView.frame = CGRectMake(kViewMargin, CGRectGetMaxY(self.searchInputTextField.frame) + kViewMargin, viewWidth, 200);
 }
 
 
@@ -52,7 +52,7 @@ static const NSInteger kMinimumQueryLength = 2;
 - (void)setupRACBindings {
     @weakify(self)
     [[[self.searchInputTextField.rac_textSignal filter:^BOOL(NSString *text) {
-        return text.length >= kMinimumQueryLength;
+        return text.length >= 2;
     }] throttle:0.5] subscribeNext:^(NSString *query) {
         NSLog(@"query = %@", query);
         @strongify(self)
@@ -60,6 +60,17 @@ static const NSInteger kMinimumQueryLength = 2;
     }];
 
     RAC(self.searchResultTextView, text) = RACObserve(self.viewModel, searchResult);
+}
+
+
+#pragma mark - UITextFieldDelegate
+
+- (BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    NSString *newString = [textField.text stringByReplacingCharactersInRange:range withString:string];
+    if (newString.length < textField.text.length) {
+        self.searchResultTextView.text = @"";
+    }
+    return YES;
 }
 
 
@@ -71,6 +82,7 @@ static const NSInteger kMinimumQueryLength = 2;
         _searchInputTextField.backgroundColor = [UIColor whiteColor];
         _searchInputTextField.placeholder = NSLocalizedString(@"Enter query", nil);
         _searchInputTextField.autocorrectionType = UITextAutocorrectionTypeNo;
+        _searchInputTextField.delegate = self;
     }
     return _searchInputTextField;
 }
@@ -83,6 +95,5 @@ static const NSInteger kMinimumQueryLength = 2;
     }
     return _searchResultTextView;
 }
-
 
 @end
