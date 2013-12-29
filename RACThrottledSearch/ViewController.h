@@ -5,7 +5,6 @@
 
 @class ViewModel;
 
-
 @interface ViewController : UIViewController
 
 @property (strong, nonatomic) ViewModel *viewModel;
