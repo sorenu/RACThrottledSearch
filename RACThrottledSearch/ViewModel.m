@@ -33,6 +33,8 @@
         @strongify(self)
         NSLog(@"result = %@", result);
         self.searchResult = result ? [NSString stringWithFormat:@"%@", result] : @"";
+    } error:^(NSError *error) {
+        self.searchResult = @"Search failed";
     }];
 }
 

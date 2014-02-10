@@ -50,14 +50,10 @@
 #pragma mark - Reactive Cocoa stuff
 
 - (void)setupRACBindings {
-    @weakify(self)
-    [[[self.searchInputTextField.rac_textSignal filter:^BOOL(NSString *text) {
+    RACSignal *querySignal = [[self.searchInputTextField.rac_textSignal filter:^BOOL(NSString *text) {
         return text.length >= 2;
-    }] throttle:0.5] subscribeNext:^(NSString *query) {
-        NSLog(@"query = %@", query);
-        @strongify(self)
-        [self.viewModel performSearchWithQuery:query];
-    }];
+    }] throttle:0.5];
+    [self.viewModel rac_liftSelector:@selector(performSearchWithQuery:) withSignals:querySignal, nil];
 
     RAC(self.searchResultTextView, text) = RACObserve(self.viewModel, searchResult);
 }
